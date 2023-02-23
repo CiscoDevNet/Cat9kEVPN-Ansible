@@ -1,6 +1,5 @@
 
 
-<h1 id="about-this-document">About this document</h1>
 <h1 id="overview-of-catalyst-9000-platforms"> Overview of Catalyst 9000 platforms</h1>
 <p>Internet of Things (IoT), mobility, and multi-cloud running on the feature-rich Cisco IOS-XE and field-reprogrammable UADP ASIC technologies which enable open programmability, analytics, and telemetry.</p>
 <p>Catalyst 9000 switching platforms offer flexible overlay solutions like Software Defined Access (SDA) fabric, End-to-End MPLS Solution and BGP-EVPN fabrics.</p>
