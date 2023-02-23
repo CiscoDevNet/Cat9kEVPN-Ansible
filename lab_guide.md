@@ -1,13 +1,6 @@
 
 
 <h1 id="about-this-document">About this document</h1>
-<p>The early field trial (EFT) program enables customer to evaluate and influence product functionality, usability and documentation before the product is released to the rest of the market. Based on experience with pre-release software and /or hardware, customers gain an understanding of how unreleased products and features work, and how these products and features can be integrated into their network designs at the time of release.</p>
-<p>EFT also facilitates an ongoing partnership between customers and engineering teams to accelerate future software and hardware innovation and increase product relevance. This document should serve, as a sample test plan to give you an idea of what sort of testing you should consider during your field trial experience. You should use it as a guide when planning your test schedule, and as a framework to create new test cases based on your own topology and deployment.</p>
-<p>EFT starts Jun 10<sup>th</sup> and is expected to last for 6 to 8 weeks.</p>
-<p>Please refer to Caveats and Known issues section for open issues. All field trial materials, including this document, are made available under non-disclosure agreement and should remain confidential between you and Cisco. Cisco is committed to providing quality products to our customers, and we appreciate your support and willingness to evaluate pre-release software, hardware, and documentation.</p>
-<p>At the EFT kick-off meeting, an email alias will be provided for communication with the Cisco EFT team. This EFT Guide specifically covers on how you can use Ansible playbooks to build solution level EVPN fabric.</p>
-<p>Thank you for participation,</p>
-<p>Cat9k EFT team</p>
 <h1 id="overview-of-catalyst-9000-platforms"> Overview of Catalyst 9000 platforms</h1>
 <p>Internet of Things (IoT), mobility, and multi-cloud running on the feature-rich Cisco IOS-XE and field-reprogrammable UADP ASIC technologies which enable open programmability, analytics, and telemetry.</p>
 <p>Catalyst 9000 switching platforms offer flexible overlay solutions like Software Defined Access (SDA) fabric, End-to-End MPLS Solution and BGP-EVPN fabrics.</p>
