@@ -1,0 +1,54 @@
+---
+#
+- name: CONFIG VRF IPV4
+  any_errors_fatal: true
+  tags:
+    - add_vrf
+    - day_two
+  cisco.ios.ios_config:
+    lines:
+      - "vrf definition {{ item.vrf_name }}"
+      - " rd {{ rid }}:{{ item.vrf_core_vlan_id }}"
+      - " address-family ipv4 unicast"
+      - "  route-target both {{ bgp_asn }}:{{ item.vrf_core_vlan_id }}"
+      - "  route-target both {{ bgp_asn }}:{{ item.vrf_core_vlan_id }} stitching"
+      - " exit-address-family"
+  loop: "{{ vrfs }}"
+#
+- name: CONFIG VRF IPV6
+  any_errors_fatal: true
+  tags:
+    - add_vrf
+    - day_two
+  cisco.ios.ios_config:
+    lines:
+      - "vrf definition {{ item.vrf_name }}"
+      - " address-family ipv6 unicast"
+      - "  route-target both {{ bgp_asn }}:{{ item.vrf_core_vlan_id }}"
+      - "  route-target both {{ bgp_asn }}:{{ item.vrf_core_vlan_id }} stitching"
+      - " exit-address-family"
+  loop: "{{ vrfs }}"
+#
+- name: SHOW CONFIG
+  any_errors_fatal: true
+  tags:
+    - add_vrf
+    - day_two
+  cisco.ios.ios_command:
+    commands:
+      - "show running-config | section vrf definition {{ item.vrf_name }}"
+      - show vrf
+      - "show vrf {{ item.vrf_name }}"
+  loop: "{{ vrfs }}"
+  register: after_show_config
+#
+- name: DEBUG
+  tags:
+    - add_vrf
+    - day_two
+  ansible.builtin.debug:
+    msg:
+      - "{{ item.stdout_lines }}"
+  loop: "{{ after_show_config.results }}"
+#
+...

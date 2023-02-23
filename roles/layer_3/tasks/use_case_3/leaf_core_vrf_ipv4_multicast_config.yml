@@ -1,0 +1,30 @@
+---
+#
+- name: CONFIG VRF IPV4
+  any_errors_fatal: true
+  cisco.ios.ios_config:
+    lines:
+      - "vrf definition {{ vrf_name }}"
+      - " rd {{ rid }}:{{ core_vlan_id }}"
+      - address-family ipv4 unicast
+      - "  route-target both {{ bgp_asn }}:{{ core_vlan_id }}"
+      - "  route-target both {{ bgp_asn }}:{{ core_vlan_id }} stitching"
+      - "  mdt default vxlan {{ mdt_group }}"
+      - mdt auto-discovery vxlan
+      - mdt overlay use-bgp spt-only
+#
+- name: SHOW CONFIG
+  any_errors_fatal: true
+  cisco.ios.ios_command:
+    commands:
+      - "show running-config | section vrf definition {{ vrf_name }}"
+      - show vrf
+      - "show vrf {{ vrf_name }}"
+  register: after_show_config
+#
+- name: DEBUG
+  ansible.builtin.debug:
+    msg:
+      - "{{ after_show_config.stdout_lines }}"
+#
+...

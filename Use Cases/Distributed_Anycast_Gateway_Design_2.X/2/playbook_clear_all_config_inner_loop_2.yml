@@ -1,0 +1,11 @@
+---
+#
+- name: CONFIG DHCP L2VNI L3 EDGE VLAN INTERFACE SVI
+  any_errors_fatal: false
+  cisco.ios.ios_config:
+    lines:
+      - "no interface Vlan{{ item.edge_vlan_id }}"
+  with_items: "{{ vrf.l2vni }}"
+  failed_when: false
+#
+...

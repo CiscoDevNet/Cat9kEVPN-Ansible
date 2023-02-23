@@ -1,0 +1,11 @@
+---
+#
+- include_tasks: l2vni_config_ipv4_inner_loop.yml
+  tags:
+    - add_l2vni_edge_vlan
+    - day_two
+  loop: "{{ vrfs }}"
+  loop_control:
+    loop_var: vrf
+#
+...

@@ -1,0 +1,51 @@
+---
+#
+- name: CONFIG L2 EDGE VLAN
+  any_errors_fatal: true
+  tags:
+    - add_edge_vlan
+    - day_two
+  cisco.ios.ios_config:
+    lines:
+      - "vlan {{ item.id }}"
+      - " name {{ item.id }}"
+  with_items: "{{ vrf.vrf_edge_vlan }}"
+#
+- name: CONFIG L3 SVI INTERFACE EDGE VLAN
+  any_errors_fatal: true
+  tags:
+    - add_edge_vlan
+    - day_two
+  cisco.ios.ios_config:
+    lines:
+      - "interface Vlan{{ item.id }}"
+      - " description VLAN{{ item.id }} SVI-INTERFACE"
+      - " vrf forwarding {{ vrf.vrf_name }}"
+      - " ip address {{ item.ip }} {{ item.mask }}"
+      - " ip dhcp relay information option vpn-id"
+      - " ip helper-address global {{ primary_dhcp_server }}"
+      - no shutdown
+  with_items: "{{ vrf.vrf_edge_vlan }}"
+#
+- name: SHOW CONFIG
+  any_errors_fatal: true
+  tags:
+    - add_edge_vlan
+    - day_two
+  cisco.ios.ios_command:
+    commands:
+      - "show running-config | section vlan {{ item.id }}"
+      - "show running-config interface Vlan{{ item.id }}"
+  with_items: "{{ vrf.vrf_edge_vlan }}"
+  register: after_show_config
+#
+- name: DEBUG
+  tags:
+    - add_edge_vlan
+    - day_two
+  ansible.builtin.debug:
+    msg:
+      - "{{ item.stdout_lines }}"
+  loop: "{{ after_show_config.results }}"
+#
+...

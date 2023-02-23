@@ -1,0 +1,11 @@
+---
+#
+- include_tasks: l3_edge_vlan_ipv4_ipv6_inner_loop.yml
+  tags:
+    - add_edge_vlan
+    - day_two
+  loop: "{{ vrfs }}"
+  loop_control:
+    loop_var: vrf
+#
+...

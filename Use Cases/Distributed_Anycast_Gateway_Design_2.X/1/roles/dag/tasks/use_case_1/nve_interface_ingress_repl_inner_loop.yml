@@ -1,0 +1,32 @@
+---
+#
+- name: CONFIG NVE INTERFACE INGRESS REPL
+  any_errors_fatal: true
+  tags:
+    - add_nve_iface_ingress_repl
+    - day_two
+  cisco.ios.ios_config:
+    lines:
+      - "interface nve {{ nve_id }}"
+      - " member vni {{ item.instance_id }} ingress-replication"
+  with_items: "{{ vrf.l2vni }}"
+#
+- name: SHOW CONFIG
+  any_errors_fatal: true
+  tags:
+    - add_nve_iface_ingress_repl
+    - day_two
+  cisco.ios.ios_command:
+    commands:
+      - "show running-config interface nve {{ nve_id }}"
+  register: after_show_config
+#
+- name: DEBUG
+  tags:
+    - add_nve_iface_ingress_repl
+    - day_two
+  ansible.builtin.debug:
+    msg:
+      - "{{ after_show_config.stdout_lines }}"
+#
+...

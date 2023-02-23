@@ -1,0 +1,51 @@
+---
+#
+- name: CONFIG BGP IPV4 + MULTICAST LEAF
+  any_errors_fatal: true
+  cisco.ios.ios_config:
+    lines:
+      - "router bgp {{ bgp_asn }}"
+      - " bgp router-id {{ rid }}"
+      - no bgp default ipv4-unicast
+      - template peer-policy VTEP-EVPN-PEER-POLICY
+      - soft-reconfiguration inbound
+      - send-community both
+      - template peer-session VTEP-EVPN-PEER-SESSION
+      - "  remote-as {{ bgp_asn }}"
+      - description BGP EVPN PEERS
+      - log-neighbor-changes
+      - "  update-source {{ bgp_source }}"
+      - exit-peer-session
+      - " neighbor {{ hostvars[item].rid }} inherit peer-session VTEP-EVPN-PEER-SESSION"
+      - address-family l2vpn evpn
+      - "  neighbor {{ hostvars[item].rid }} activate"
+      - "  neighbor {{ hostvars[item].rid }} inherit peer-policy VTEP-EVPN-PEER-POLICY"
+      - exit-address-family
+      - " address-family ipv4 vrf {{ vrf_name }}"
+      - advertise l2vpn evpn
+      - redistribute connected
+      - maximum-paths 4
+      - exit-address-family
+      - " address-family ipv4 mvpn"
+      - "  neighbor {{ hostvars[item].rid }} activate"
+      - "  neighbor {{ hostvars[item].rid }} send-community both"
+      - " exit-address-family"
+    parents:
+      - "router bgp {{ bgp_asn }}"
+      - address-family l2vpn evpn
+      - " address-family ipv4 mvpn"
+  with_items: "{{ groups['spines'] }}"
+#
+- name: SHOW CONFIG
+  any_errors_fatal: true
+  cisco.ios.ios_command:
+    commands:
+      - "show running-config | section router bgp {{ bgp_asn }}"
+  register: after_show_config
+#
+- name: DEBUG
+  ansible.builtin.debug:
+    msg:
+      - "{{ after_show_config.stdout_lines }}"
+#
+...

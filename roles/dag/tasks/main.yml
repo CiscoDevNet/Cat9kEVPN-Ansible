@@ -1,0 +1,19 @@
+---
+#
+- name: Deploy Use Case 1
+  import_tasks: use_case_1/dag.yml
+  when: use_case == 'one'
+#
+- name: Deploy Use Case 2
+  import_tasks: use_case_2/dag.yml
+  when: use_case == 'two'
+#
+- name: Deploy Use Case 3
+  import_tasks: use_case_3/dag.yml
+  when: use_case == 'three'
+#
+- name: Deploy Use Case 4
+  import_tasks: use_case_4/dag.yml
+  when: use_case == 'four'
+#
+...

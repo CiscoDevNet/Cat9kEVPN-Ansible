@@ -1,0 +1,7 @@
+---
+#
+- name: Deploy Use Case 2
+  import_tasks: use_case_2/l3.yml
+  when: use_case == 'two'
+#
+...

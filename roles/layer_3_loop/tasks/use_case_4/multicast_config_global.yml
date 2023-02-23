@@ -1,0 +1,35 @@
+---
+#
+- name: CONFIG MULTICAST GLOBAL
+  tags:
+    - add_mcast_global
+    - day_two
+  any_errors_fatal: true
+  cisco.ios.ios_config:
+    lines:
+      - "ip multicast-routing vrf {{ item.vrf_name }}"
+      - "ip pim vrf {{ item.vrf_name }} rp-address {{ anycast_rp }}"
+  loop: "{{ vrfs }}"
+#
+- name: SHOW CONFIG
+  tags:
+    - add_mcast_global
+    - day_two
+  any_errors_fatal: true
+  cisco.ios.ios_command:
+    commands:
+      - "show running-config | section ip multicast-routing vrf {{ item.vrf_name }}"
+      - "show running-config | section ip pim vrf {{ item.vrf_name }} rp-address {{ anycast_rp }}"
+  loop: "{{ vrfs }}"
+  register: after_show_config
+#
+- name: DEBUG
+  tags:
+    - add_mcast_global
+    - day_two
+  ansible.builtin.debug:
+    msg:
+      - "{{ item.stdout_lines }}"
+  loop: "{{ after_show_config.results }}"
+#
+...

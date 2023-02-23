@@ -1,0 +1,11 @@
+---
+#
+- include_tasks: l2vni_dhcp_config_inner_loop.yml
+  tags:
+    - add_l2vni_dhcp_config
+    - day_two
+  loop: "{{ vrfs }}"
+  loop_control:
+    loop_var: vrf
+#
+...

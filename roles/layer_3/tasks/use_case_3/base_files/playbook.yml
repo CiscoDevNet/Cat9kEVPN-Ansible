@@ -1,0 +1,10 @@
+---
+#
+- hosts: network
+  gather_facts: yes
+  vars:
+    use_case: three
+  roles:
+    - layer_3
+#
+...

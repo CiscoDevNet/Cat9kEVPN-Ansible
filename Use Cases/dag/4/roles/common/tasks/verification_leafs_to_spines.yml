@@ -1,0 +1,38 @@
+---
+#
+- name: PING LEAFS TO SPINES
+  any_errors_fatal: true
+  cisco.ios.ios_ping:
+    dest: "{{ hostvars[item].rid }}"
+    source: "{{ rid }}"
+    count: "{{ ping_count }}"
+    state: present
+  with_items:
+    - "{{ groups['spines'] }}"
+  register: after_ping
+#
+- name: SHOW PING DETAILS
+  ansible.builtin.debug:
+    msg:
+      - "PING DESTINATION: {{ hostvars[item].rid }}"
+      - "PING SOURCE: {{ rid }}"
+      - "PING COUNT: {{ ping_count }}"
+      - "PING MAX LOSS: {{ ping_loss }}%"
+      - "NETWORK DEVICE IP: {{ ansible_host }}"
+      - "NETWORK DEVICE HOSTNAME: {{ ansible_net_hostname }}"
+  with_items:
+    - "{{ groups['spines'] }}"
+#
+- name: ASSERT SUCCESS OR FAILURE PING LEAFS TO SPINES
+  any_errors_fatal: true
+  assert:
+    that:
+      - item.packet_loss is version({{ ping_loss }}, '<')
+    fail_msg:
+      - "---> NOT LESS THAN {{ ping_loss }}% LOSS ON TEST PING!, CHECK NOT PASSED, REVIEW TEST OUTPUT ABOVE! <---"
+    success_msg:
+      - "---> LESS THAN {{ ping_loss }}% LOSS ON TEST PING!, CHECK PASSED! <---"
+    quiet: no
+  loop: "{{ after_ping.results }}"
+#
+...

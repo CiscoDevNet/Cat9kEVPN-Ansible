@@ -1,0 +1,31 @@
+---
+#
+- name: CONFIG DHCP L2VNI L3 INTERFACE EDGE VLAN SVI
+  any_errors_fatal: true
+  cisco.ios.ios_config:
+    lines:
+      - "interface Vlan{{ l2vni_edge_vlan_id }}"
+      - " description {{ l2vni_edge_vlan_id }} SVI-INTERFACE"
+      - " vrf forwarding {{ vrf_name }}"
+      - " mac-address {{ dag_mac }}"
+      - " ip address {{ dag_ipv4_address }} {{ dag_ipv4_mask }}"
+      - " ip dhcp relay information option vpn-id"
+      - " ip helper-address global {{ primary_dhcp_server }}"
+      - no shutdown
+#
+- name: SHOW CONFIG
+  any_errors_fatal: true
+  cisco.ios.ios_command:
+    commands:
+      - "show running-config | section vlan {{ l2vni_edge_vlan_id }}"
+      - "show running-config | section vlan configuration {{ l2vni_edge_vlan_id }}"
+      - "show running-config | section l2vpn evpn instance {{ l2vni_instance_id }} vlan-based"
+      - "show running-config | section interface Vlan{{ l2vni_edge_vlan_id }}"
+  register: after_show_config
+#
+- name: DEBUG
+  ansible.builtin.debug:
+    msg:
+      - "{{ after_show_config.stdout_lines }}"
+#
+...

@@ -1,0 +1,72 @@
+---
+#
+- name: CONFIG VTP MODE
+  any_errors_fatal: true
+  tags:
+    - add_core_vlan
+    - day_two
+  cisco.ios.ios_config:
+    lines:
+      - vtp mode transparent
+#
+- name: CONFIG L2 CORE VLAN
+  any_errors_fatal: true
+  tags:
+    - add_core_vlan
+    - day_two
+  cisco.ios.ios_config:
+    lines:
+      - "vlan {{ item.vrf_core_vlan_id }}"
+      - " name {{ item.vrf_core_vlan_id }}"
+  loop: "{{ vrfs }}"
+#
+- name: CONFIG L2 CORE VLAN MEMBER L3 VNI
+  any_errors_fatal: true
+  tags:
+    - add_core_vlan
+    - day_two
+  cisco.ios.ios_config:
+    lines:
+      - "vlan configuration {{ item.vrf_core_vlan_id }}"
+      - " member vni {{ item.vrf_l3_vni_id }}"
+  loop: "{{ vrfs }}"
+#
+- name: CONFIG L3 SVI INTERFACE CORE VLAN
+  any_errors_fatal: true
+  tags:
+    - add_core_vlan
+    - day_two
+  cisco.ios.ios_config:
+    lines:
+      - "interface Vlan{{ item.vrf_core_vlan_id }}"
+      - " description {{ item.vrf_core_vlan_id }} SVI Interface"
+      - " vrf forwarding {{ item.vrf_name }}"
+      - " ip unnumbered {{ loopback }}"
+      - no autostate
+      - no shutdown
+  loop: "{{ vrfs }}"
+#
+- name: SHOW CONFIG
+  any_errors_fatal: true
+  tags:
+    - add_core_vlan
+    - day_two
+  cisco.ios.ios_command:
+    commands:
+      - "show running-config | section vtp mode transparent"
+      - "show running-config | section vlan {{ item.vrf_core_vlan_id }}"
+      - "show running-config | section vlan configuration {{ item.vrf_core_vlan_id }}"
+      - "show running-config interface Vlan{{ item.vrf_core_vlan_id }}"
+  loop: "{{ vrfs }}"
+  register: after_show_config
+#
+- name: DEBUG
+  tags:
+    - add_core_vlan
+    - day_two
+  ansible.builtin.debug:
+    msg:
+      - "{{ item.stdout_lines }}"
+  loop: "{{ after_show_config.results }}"
+#
+...

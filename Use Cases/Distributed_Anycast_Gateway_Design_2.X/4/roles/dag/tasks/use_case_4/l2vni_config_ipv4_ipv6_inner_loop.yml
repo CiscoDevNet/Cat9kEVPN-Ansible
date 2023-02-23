@@ -1,0 +1,85 @@
+---
+#
+- name: CONFIG VTP MODE
+  any_errors_fatal: true
+  tags:
+    - add_l2vni_edge_vlan
+    - day_two
+  cisco.ios.ios_config:
+    lines:
+      - vtp mode transparent
+#
+- name: CONFIG L2VNI EDGE VLAN
+  any_errors_fatal: true
+  tags:
+    - add_l2vni_edge_vlan
+    - day_two
+  cisco.ios.ios_config:
+    lines:
+      - "vlan {{ item.edge_vlan_id }}"
+      - " name {{ item.edge_vlan_id }}"
+  with_items: "{{ vrf.l2vni }}"
+#
+- name: CONFIG L2VNI EDGE VLAN CONFIGURATION MEMBER
+  any_errors_fatal: true
+  tags:
+    - add_l2vni_edge_vlan
+    - day_two
+  cisco.ios.ios_config:
+    lines:
+      - "vlan configuration {{ item.edge_vlan_id }}"
+      - " member evpn-instance {{ item.edge_vlan_id }} vni {{ item.instance_id }}"
+  with_items: "{{ vrf.l2vni }}"
+#
+- name: CONFIG L2VNI L2VPN EVPN INSTANCE
+  any_errors_fatal: true
+  tags:
+    - add_l2vni_edge_vlan
+    - day_two
+  cisco.ios.ios_config:
+    lines:
+      - "l2vpn evpn instance {{ item.instance_id }} vlan-based"
+      - " encapsulation vxlan"
+      - " auto-route-target"
+  with_items: "{{ vrf.l2vni }}"
+#
+- name: CONFIG L2VNI L3 INTERFACE EDGE VLAN SVI
+  any_errors_fatal: true
+  tags:
+    - add_l2vni_edge_vlan
+    - day_two
+  cisco.ios.ios_config:
+    lines:
+      - "interface Vlan{{ item.edge_vlan_id }}"
+      - " description {{ item.edge_vlan_id }} SVI-INTERFACE"
+      - " vrf forwarding {{ vrf.vrf_name }}"
+      - " mac-address {{ item.dag_mac }}"
+      - " ip address {{ item.dag_ipv4_address }} {{ item.dag_ipv4_mask }}"
+      - " ipv6 address {{ item.dag_ipv6_address }}/{{ item.dag_ipv6_prefix }}"
+      - no shutdown
+  with_items: "{{ vrf.l2vni }}"
+#
+- name: SHOW CONFIG
+  any_errors_fatal: true
+  tags:
+    - add_l2vni_edge_vlan
+    - day_two
+  cisco.ios.ios_command:
+    commands:
+      - "show running-config | section vlan {{ item.edge_vlan_id }}"
+      - "show running-config | section vlan configuration {{ item.edge_vlan_id }}"
+      - "show running-config | section l2vpn evpn instance {{ item.instance_id }} vlan-based"
+      - "show running-config | section interface Vlan{{ item.edge_vlan_id }}"
+  with_items: "{{ vrf.l2vni }}"
+  register: after_show_config
+#
+- name: DEBUG
+  tags:
+    - add_l2vni_edge_vlan
+    - day_two
+  ansible.builtin.debug:
+    msg:
+      - "{{ item.stdout_lines }}"
+  loop: "{{ after_show_config.results }}"
+#
+...

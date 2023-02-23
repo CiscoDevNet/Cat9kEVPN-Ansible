@@ -1,0 +1,51 @@
+---
+#
+# 1
+- import_tasks: roles/common/tasks/verification_license.yml
+# 2
+- import_tasks: roles/common/tasks/verification_leafs_to_spines.yml
+  when: "'leafs' in group_names"
+# 3
+- import_tasks: roles/common/tasks/verification_spines_to_leafs.yml
+  when: "'spines' in group_names"
+# 4
+- import_tasks: roles/common/tasks/backup_config.yml
+# 5
+- include_tasks: ipv6_global_config.yml
+  when: "'leafs' in group_names"
+# 6
+- include_tasks: leaf_core_vrf_ipv4_ipv6_multicast_config.yml
+  when: "'leafs' in group_names"
+# 7
+- include_tasks: multicast_config_global.yml
+  when: "'leafs' in group_names"
+# 8
+- include_tasks: leaf_core_vlan_ipv4_ipv6_multicast_config.yml
+  when: "'leafs' in group_names"
+# 9
+- include_tasks: l3_edge_vlan_ipv4_ipv6.yml
+  when: "'leafs' in group_names"
+# 10
+- include_tasks: dhcp_config.yml
+  when: "'leafs' in group_names"
+# 11
+- include_tasks: nve_interface.yml
+  when: "'leafs' in group_names"
+# 12
+- include_tasks: bgp_config_ipv4_ipv6_multicast_config.yml
+  when: "'leafs' in group_names"
+# 13
+- include_tasks: leaf_border_handoff_multicast_config.yml
+  when: "'leafs' in group_names and 'border' in role"
+# 14
+- include_tasks: spine_bgp_ipv4_core.yml
+  when: "'spines' in group_names"
+# 15
+- import_tasks: roles/common/tasks/save_config.yml
+# 16
+- import_tasks: roles/common/tasks/backup_config.yml
+# 17
+- include_tasks: roles/common/tasks/verification_bgp.yml
+  when: "'spines' in group_names"
+#
+...

@@ -1,0 +1,19 @@
+---
+#
+- name: CLEAR CONFIG L3 SVI INTERFACE EDGE VLAN
+  any_errors_fatal: true
+  cisco.ios.ios_config:
+    lines:
+      - "no interface Vlan{{ item.id }}"
+  with_items: "{{ vrf.vrf_edge_vlan }}"
+  failed_when: false
+#
+- name: CLEAR CONFIG L2 EDGE VLAN
+  any_errors_fatal: true
+  cisco.ios.ios_config:
+    lines:
+      - "no vlan {{ item.id }}"
+  with_items: "{{ vrf.vrf_edge_vlan }}"
+  failed_when: false
+#
+...

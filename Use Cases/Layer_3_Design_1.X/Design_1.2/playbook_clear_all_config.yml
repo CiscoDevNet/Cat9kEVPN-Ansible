@@ -1,0 +1,97 @@
+---
+#
+- hosts: network
+  gather_facts: no
+#
+  tasks:
+#
+    - name: CLEAR CONFIG BGP IPV4 SPINE
+      cisco.ios.ios_config:
+        lines:
+          - "no router bgp {{ bgp_asn }}"
+      failed_when: false
+#
+    - name: CLEAR CONFIG BGP LEAF BORDER HANDOFF IPV4 IPV6
+      cisco.ios.ios_config:
+        lines:
+          - "no router bgp {{ bgp_asn }}"
+      failed_when: false
+#
+    - name: CLEAR CONFIG BGP IPV4 IPV6 LEAF
+      cisco.ios.ios_config:
+        lines:
+          - "no router bgp {{ bgp_asn }}"
+      failed_when: false
+#
+    - name: CLEAR CONFIG NVE INTERFACE
+      cisco.ios.ios_config:
+        lines:
+          - "no interface nve {{ nve_id }}"
+      failed_when: false
+#
+    - name: CLEAR CONFIG DHCP GLOBAL
+      cisco.ios.ios_config:
+        lines:
+          - no ip dhcp relay information option vpn
+          - no ip dhcp relay information option
+          - no ip dhcp compatibility suboption link-selection standard
+          - no ip dhcp compatibility suboption server-override standard
+      failed_when: false
+#
+    - name: CLEAR L3/L2 EDGE VLAN IPV4 IPV6
+      when: "'leafs' in group_names"
+      include_tasks: playbook_clear_all_config_inner_loop.yml
+      loop: "{{ vrfs }}"
+      loop_control:
+        loop_var: vrf
+#
+    - name: CLEAR CONFIG L3 SVI INTERFACE CORE VLAN
+      when: "'leafs' in group_names"
+      cisco.ios.ios_config:
+        lines:
+          - "no interface Vlan{{ item.vrf_core_vlan_id }}"
+      loop: "{{ vrfs }}"
+      failed_when: false
+#
+    - name: CLEAR CONFIG L2 CORE VLAN MEMBER L3 VNI
+      when: "'leafs' in group_names"
+      cisco.ios.ios_config:
+        lines:
+          - "no vlan configuration {{ item.vrf_core_vlan_id }}"
+      loop: "{{ vrfs }}"
+      failed_when: false
+#
+    - name: CLEAR CONFIG L2 CORE VLAN
+      when: "'leafs' in group_names"
+      cisco.ios.ios_config:
+        lines:
+          - "no vlan {{ item.vrf_core_vlan_id }}"
+      loop: "{{ vrfs }}"
+      failed_when: false
+#
+    - name: CLEAR CONFIG VRF
+      when: "'leafs' in group_names"
+      cisco.ios.ios_config:
+        lines:
+          - "no vrf definition {{ item.vrf_name }}"
+      loop: "{{ vrfs }}"
+      failed_when: false
+#
+    - name: WAIT FOR CLEAR CONFIG VRF
+      when: "'leafs' in group_names"
+      cisco.ios.ios_command:
+        commands:
+          - show vrf
+        wait_for:
+          "result[0] not contains {{ item.vrf_name }}"
+        retries: 999
+      loop: "{{ vrfs }}"
+      register: after_show_vrf
+#
+    - name: CLEAR CONFIG IPV6 ROUTING SUPPORT
+      cisco.ios.ios_config:
+        lines:
+          - no ipv6 unicast-routing
+      failed_when: false
+#
+...

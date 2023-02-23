@@ -1,0 +1,7 @@
+---
+#
+- name: Deploy Use Case 4
+  import_tasks: use_case_4/l3.yml
+  when: use_case == 'four'
+#
+...

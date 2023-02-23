@@ -1,0 +1,27 @@
+---
+#
+- name: CONFIG L2VNI L2VPN EVPN INSTANCE
+  any_errors_fatal: false
+  cisco.ios.ios_config:
+    lines:
+      - "no l2vpn evpn instance {{ item.instance_id }} vlan-based"
+  with_items: "{{ vrf.l2vni }}"
+  failed_when: false
+#
+- name: CONFIG L2VNI EDGE VLAN CONFIGURATION MEMBER
+  any_errors_fatal: false
+  cisco.ios.ios_config:
+    lines:
+      - "no vlan configuration {{ item.edge_vlan_id }}"
+  with_items: "{{ vrf.l2vni }}"
+  failed_when: false
+#
+- name: CONFIG L2VNI L2 EDGE VLAN
+  any_errors_fatal: false
+  cisco.ios.ios_config:
+    lines:
+      - "no vlan {{ item.edge_vlan_id }}"
+  with_items: "{{ vrf.l2vni }}"
+  failed_when: false
+#
+...

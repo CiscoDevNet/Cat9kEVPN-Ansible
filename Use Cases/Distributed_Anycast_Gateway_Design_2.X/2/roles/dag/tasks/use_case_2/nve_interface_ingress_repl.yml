@@ -1,0 +1,11 @@
+---
+#
+- include_tasks: nve_interface_ingress_repl_inner_loop.yml
+  tags:
+    - add_nve_iface_ingress_repl
+    - day_two
+  loop: "{{ vrfs }}"
+  loop_control:
+    loop_var: vrf
+#
+...

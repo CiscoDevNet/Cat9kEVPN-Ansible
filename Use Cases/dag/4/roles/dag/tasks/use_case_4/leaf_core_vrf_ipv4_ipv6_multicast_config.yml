@@ -1,0 +1,39 @@
+---
+#
+- name: CONFIG VRF IPV4 IPV6 MODULE IOS_VRF
+  any_errors_fatal: true
+  cisco.ios.ios_vrf:
+    name: "{{ vrf_name }}"
+    rd: "{{ rid }}:{{ core_vlan_id }}"
+    route_both_ipv4:
+      - "{{ bgp_asn }}:{{ core_vlan_id }}"
+      - "{{ bgp_asn }}:{{ core_vlan_id }} stitching"
+    route_both_ipv6:
+      - "{{ bgp_asn }}:{{ core_vlan_id }}"
+      - "{{ bgp_asn }}:{{ core_vlan_id }} stitching"
+#
+- name: CONFIG VRF MULTICAST
+  any_errors_fatal: true
+  cisco.ios.ios_config:
+    lines:
+      - "vrf definition {{ vrf_name }}"
+      - " address-family ipv4 unicast"
+      - "  mdt default vxlan {{ mdt_group }}"
+      - "  mdt auto-discovery vxlan"
+      - "  mdt overlay use-bgp spt-only"
+#
+- name: SHOW CONFIG
+  any_errors_fatal: true
+  cisco.ios.ios_command:
+    commands:
+      - "show running-config | section vrf definition {{ vrf_name }}"
+      - show vrf
+      - "show vrf {{ vrf_name }}"
+  register: after_show_config
+#
+- name: DEBUG
+  ansible.builtin.debug:
+    msg:
+      - "{{ after_show_config.stdout_lines }}"
+#
+...

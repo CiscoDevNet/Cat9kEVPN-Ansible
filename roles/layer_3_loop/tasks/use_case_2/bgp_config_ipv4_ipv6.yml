@@ -1,0 +1,80 @@
+---
+#
+- name: CONFIG BGP IPV4 IPV6 LEAF
+  any_errors_fatal: true
+  tags:
+    - add_bgp_leaf
+    - day_two
+  cisco.ios.ios_config:
+    lines:
+      - "router bgp {{ bgp_asn }}"
+      - " bgp router-id {{ rid }}"
+      - no bgp default ipv4-unicast
+      - template peer-policy VTEP-EVPN-PEER-POLICY
+      - soft-reconfiguration inbound
+      - send-community both
+      - template peer-session VTEP-EVPN-PEER-SESSION
+      - "  remote-as {{ bgp_asn }}"
+      - description BGP EVPN PEERS
+      - log-neighbor-changes
+      - "  update-source {{ bgp_source }}"
+      - exit-peer-session
+      - " neighbor {{ hostvars[item].rid }} inherit peer-session VTEP-EVPN-PEER-SESSION"
+      - address-family l2vpn evpn
+      - "  neighbor {{ hostvars[item].rid }} activate"
+      - "  neighbor {{ hostvars[item].rid }} inherit peer-policy VTEP-EVPN-PEER-POLICY"
+      - exit-address-family
+    parents:
+      - "router bgp {{ bgp_asn }}"
+      - address-family l2vpn evpn
+  with_items: "{{ groups['spines'] }}"
+#
+- name: CONFIG BGP IPV4 VRF LEAF
+  any_errors_fatal: true
+  tags:
+    - add_bgp_leaf
+    - day_two
+  cisco.ios.ios_config:
+    lines:
+      - "router bgp {{ bgp_asn }}"
+      - " address-family ipv4 vrf {{ item.vrf_name }}"
+      - advertise l2vpn evpn
+      - redistribute connected
+      - maximum-paths 4
+      - exit-address-family
+  with_items: "{{ vrfs }}"
+#
+- name: CONFIG BGP IPV6 VRF LEAF
+  any_errors_fatal: true
+  tags:
+    - add_bgp_leaf
+    - day_two
+  cisco.ios.ios_config:
+    lines:
+      - "router bgp {{ bgp_asn }}"
+      - " address-family ipv6 vrf {{ item.vrf_name }}"
+      - advertise l2vpn evpn
+      - redistribute connected
+      - maximum-paths 4
+      - exit-address-family
+  with_items: "{{ vrfs }}"
+#
+- name: SHOW CONFIG
+  any_errors_fatal: true
+  tags:
+    - add_bgp_leaf
+    - day_two
+  cisco.ios.ios_command:
+    commands:
+      - "show running-config | section router bgp {{ bgp_asn }}"
+  register: after_show_config
+#
+- name: DEBUG
+  tags:
+    - add_bgp_leaf
+    - day_two
+  ansible.builtin.debug:
+    msg:
+      - "{{ after_show_config.stdout_lines }}"
+#
+...

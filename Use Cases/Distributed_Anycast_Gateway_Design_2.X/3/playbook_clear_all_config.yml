@@ -1,0 +1,117 @@
+#
+- hosts: network
+  gather_facts: no
+#
+  tasks:
+#
+    - name: CLEAR CONFIG BGP IPV4 SPINE
+      cisco.ios.ios_config:
+        lines:
+          - "no router bgp {{ bgp_asn }}"
+      failed_when: false
+#
+    - name: CLEAR CONFIG BGP LEAF BORDER HANDOFF
+      cisco.ios.ios_config:
+        lines:
+          - "no router bgp {{ bgp_asn }}"
+      failed_when: false
+#
+    - name: CLEAR CONFIG BGP IPV4 LEAF
+      cisco.ios.ios_config:
+        lines:
+          - "no router bgp {{ bgp_asn }}"
+      failed_when: false
+#
+    - name: CLEAR CONFIG NVE INTERFACE MCAST REPL
+      cisco.ios.ios_config:
+        lines:
+          - "no interface nve {{ nve_id }}"
+      failed_when: false
+#
+    - name: CLEAR CONFIG NVE INTERFACE INGRESS REPL
+      cisco.ios.ios_config:
+        lines:
+          - "no interface nve {{ nve_id }}"
+      failed_when: false
+#
+    - name: CLEAR CONFIG NVE INTERFACE
+      cisco.ios.ios_config:
+        lines:
+          - "no interface nve {{ nve_id }}"
+      failed_when: false
+#
+    - name: CLEAR CONFIG DHCP GLOBAL
+      cisco.ios.ios_config:
+        lines:
+          - no ip dhcp relay information option vpn
+          - no ip dhcp relay information option
+          - no ip dhcp compatibility suboption link-selection standard
+          - no ip dhcp compatibility suboption server-override standard
+      failed_when: false
+#
+    - name: CLEAR CONFIG LEAF_CORE_VLAN_IPV4_MULTICAST_CONFIG
+      when: "'leafs' in group_names"
+      cisco.ios.ios_config:
+        lines:
+          - "no interface Vlan{{ item.vrf_core_vlan_id }}"
+          - "no vlan configuration {{ item.vrf_core_vlan_id }}"
+          - "no vlan {{ item.vrf_core_vlan_id }}"
+      loop: "{{ vrfs }}"
+      failed_when: false
+#
+    - name: CLEAR CONFIG DHCP L2VNI L3 INTERFACE EDGE VLAN SVI
+      when: "'leafs' in group_names"
+      include_tasks: playbook_clear_all_config_inner_loop_1.yml
+      loop: "{{ vrfs }}"
+      loop_control:
+        loop_var: vrf
+#
+    - name: CLEAR CONFIG L2VNI_CONFIG_IPV4 1
+      when: "'leafs' in group_names"
+      include_tasks: playbook_clear_all_config_inner_loop_2.yml
+      loop: "{{ vrfs }}"
+      loop_control:
+        loop_var: vrf
+#
+    - name: CLEAR CONFIG L2VNI_CONFIG_IPV4 2
+      when: "'leafs' in group_names"
+      include_tasks: playbook_clear_all_config_inner_loop_3.yml
+      loop: "{{ vrfs }}"
+      loop_control:
+        loop_var: vrf
+#
+    - name: CLEAR CONFIG L2VPN EVPN REPLICATION MODE
+      cisco.ios.ios_config:
+        lines:
+          - no l2vpn evpn
+      failed_when: false
+#
+    - name: CLEAR CONFIG MULTICAST GLOBAL
+      when: "'leafs' in group_names"
+      cisco.ios.ios_config:
+        lines:
+          - "no ip pim vrf {{ item.vrf_name }} rp-address {{ anycast_rp }}"
+          - "no ip multicast-routing vrf {{ item.vrf_name }}"
+      loop: "{{ vrfs }}"
+      failed_when: false
+#
+    - name: CLEAR CONFIG VRF IPV4
+      when: "'leafs' in group_names"
+      cisco.ios.ios_config:
+        lines:
+          - "no vrf definition {{ item.vrf_name }}"
+      loop: "{{ vrfs }}"
+      failed_when: false
+#
+    - name: SHOW VRF
+      when: "'leafs' in group_names"
+      cisco.ios.ios_command:
+        commands:
+          - show vrf
+        wait_for:
+          "result[0] not contains {{ item.vrf_name }}"
+        retries: 999
+      loop: "{{ vrfs }}"
+      register: after_show_vrf
+#
+...

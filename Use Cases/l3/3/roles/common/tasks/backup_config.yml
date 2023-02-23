@@ -1,0 +1,16 @@
+---
+#
+- name: BACKUP CONFIG
+  any_errors_fatal: true
+  cisco.ios.ios_config:
+    backup: yes
+    backup_options:
+      dir_path: "{{ backups_path }}"
+  register: after_backup_config
+#
+- name: DEBUG
+  ansible.builtin.debug:
+    msg:
+      - "{{ after_backup_config }}"
+#
+...
