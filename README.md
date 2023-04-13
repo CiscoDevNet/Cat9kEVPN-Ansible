@@ -14,7 +14,7 @@
 ###
   * To install this role execute this command on the Ansible server:
     ```SHELL
-    ansible-galaxy install git+https://github.com/jbogarin/bgp-evpn-ansible.git
+    ansible-galaxy install git+https://github.com/CiscoDevNet/Cat9kEVPN-Ansible.git
     ```
 
 ###
